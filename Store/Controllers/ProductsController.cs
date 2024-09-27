@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store.Data;
+using Store.DTO.Products;
 using Store.Model;
 
 namespace Store.Controllers
@@ -20,7 +21,7 @@ namespace Store.Controllers
 		[HttpGet]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		public ActionResult<IEnumerable<Products>> GetAll()
+		public ActionResult<IEnumerable<ProductsModel>> GetAll()
 		{
 			var List = _dbContext.Products.ToList();
 			if (List is not null)
@@ -33,7 +34,7 @@ namespace Store.Controllers
 		[HttpGet("{id:Guid}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		public ActionResult<Products> GetById(Guid id)
+		public ActionResult<ProductsModel> GetById(Guid id)
 		{
 			var pro = _dbContext.Products.Find(id)!;
 			if (pro is not null)
@@ -45,8 +46,13 @@ namespace Store.Controllers
 
 		[HttpPost]
 		[ProducesResponseType(StatusCodes.Status201Created)]
-		public async Task<ActionResult<Products>> Create([FromBody] Products products)
+		public async Task<ActionResult<ProductsModel>> Create([FromBody] ProductsDTO productsdto)
 		{
+			ProductsModel products = new ProductsModel()
+			{
+				Name = productsdto.Name,
+				Description = productsdto.Description,
+			};
 			await _dbContext.Products.AddAsync(products);
 			await _dbContext.SaveChangesAsync();
 			return CreatedAtAction("GetById",new {Id=products.Id },products);
@@ -55,7 +61,7 @@ namespace Store.Controllers
 		[HttpPut]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult> Update([FromBody] Products products)
+		public async Task<ActionResult> Update([FromBody] ProductsModel products)
 		{
 			var response = await _dbContext.Products.AsNoTracking().FirstOrDefaultAsync(x=>x.Id == products.Id);
 			if (response is not null)
@@ -70,7 +76,7 @@ namespace Store.Controllers
 		[HttpDelete("{id:Guid}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Products>> Delete(Guid id)
+		public async Task<ActionResult<ProductsModel>> Delete(Guid id)
 		{
 			var product = _dbContext.Products.Find(id);
 			if (product is not null)
