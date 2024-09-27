@@ -46,7 +46,7 @@ namespace Store.Controllers
 
 		[HttpPost]
 		[ProducesResponseType(StatusCodes.Status201Created)]
-		public async Task<ActionResult<ProductsModel>> Create([FromBody] ProductsDTO productsdto)
+		public async Task<ActionResult<ProductsDTO>> Create([FromBody] ProductsDTO productsdto)
 		{
 			ProductsModel products = new ProductsModel()
 			{
