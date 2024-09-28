@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Store.Comman.MapProfile;
 using Store.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,7 +13,19 @@ builder.Services.AddCors(options =>
 });
 #endregion
 
+#region Auto mapper
+
+builder.Services.AddAutoMapper(typeof(MapProduct));
+
+#endregion
+
+#region Database Connection
+
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+#endregion
+
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

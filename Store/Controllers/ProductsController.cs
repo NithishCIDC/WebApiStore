@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store.Data;
@@ -12,10 +13,12 @@ namespace Store.Controllers
 	public class ProductsController : ControllerBase
 	{
 		private readonly ApplicationDbContext _dbContext;
+		private readonly IMapper _mapper;
 
-		public ProductsController(ApplicationDbContext dbContext)
+		public ProductsController(ApplicationDbContext dbContext,IMapper mapper)
 		{
 			_dbContext = dbContext;
+			_mapper = mapper;
 		}
 
 		[HttpGet]
@@ -31,10 +34,10 @@ namespace Store.Controllers
 			return NoContent();
 		}
 
-		[HttpGet("{id:Guid}")]
+		[HttpGet("{id:int}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		public ActionResult<ProductsModel> GetById(Guid id)
+		public ActionResult<ProductsModel> GetById(int id)
 		{
 			var pro = _dbContext.Products.Find(id)!;
 			if (pro is not null)
@@ -48,11 +51,12 @@ namespace Store.Controllers
 		[ProducesResponseType(StatusCodes.Status201Created)]
 		public async Task<ActionResult<ProductsDTO>> Create([FromBody] ProductsDTO productsdto)
 		{
-			ProductsModel products = new ProductsModel()
-			{
-				Name = productsdto.Name,
-				Description = productsdto.Description,
-			};
+			//ProductsModel products = new ProductsModel()
+			//{
+			//	Name = productsdto.Name,
+			//	Description = productsdto.Description,
+			//};
+			var products = _mapper.Map<ProductsModel>(productsdto);
 			await _dbContext.Products.AddAsync(products);
 			await _dbContext.SaveChangesAsync();
 			return CreatedAtAction("GetById",new {Id=products.Id },products);
@@ -68,22 +72,22 @@ namespace Store.Controllers
 			{
 				_dbContext.Products.Update(products);
 				await _dbContext.SaveChangesAsync();
-				return Ok();
+				return Ok(products);
 			}
 			return NotFound();
 		}
 
-		[HttpDelete("{id:Guid}")]
+		[HttpDelete("{id:int}")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<ProductsModel>> Delete(Guid id)
+		public async Task<ActionResult<ProductsModel>> Delete(int id)
 		{
 			var product = _dbContext.Products.Find(id);
 			if (product is not null)
 			{
 				_dbContext.Products.Remove(product);
 				await _dbContext.SaveChangesAsync();
-				return Ok();
+				return Ok(product);
 			}
 			return NotFound();
 		}
